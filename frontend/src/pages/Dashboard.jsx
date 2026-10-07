@@ -86,7 +86,6 @@ function SubmissionsTab() {
   const [loading, setLoading] = useState(true)
   const [viewing, setViewing] = useState(null)
   
-  const [filterStar, setFilterStar] = useState('All')
 
   const fetchSubmissions = async () => {
     setLoading(true)
@@ -158,18 +157,7 @@ function SubmissionsTab() {
 
   // Calculate stats
   const totalSubmissions = submissions.length;
-  const ratings = submissions.map(s => s.overall_rating).filter(r => r !== null);
-  const averageRating = ratings.length > 0 ? (ratings.reduce((a,b)=>a+b,0) / ratings.length).toFixed(1) : 0;
-  
-  const starCounts = { 5:0, 4:0, 3:0, 2:0, 1:0 };
-  ratings.forEach(r => { if(starCounts[r] !== undefined) starCounts[r]++ });
-
-  const filteredSubmissions = submissions.filter(s => {
-    if (filterStar !== 'All') {
-      return s.overall_rating === parseInt(filterStar);
-    }
-    return true;
-  });
+  const filteredSubmissions = submissions;
 
   return (
     <div>
@@ -185,25 +173,9 @@ function SubmissionsTab() {
           <span className="stat-label">Total Submissions</span>
           <span className="stat-value text-blue-600">{totalSubmissions}</span>
         </div>
-        <div className="stat-card" style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <span className="stat-label">Average Rating</span>
-          <span className="stat-value flex items-center gap-2">
-            {averageRating} <span style={{ color: '#fbbf24', fontSize: '2rem' }}>★</span>
-          </span>
-        </div>
+
       </div>
 
-      <div className="mb-6 flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100 inline-flex">
-        <span className="font-bold text-gray-700 uppercase tracking-wide text-sm">Filter by Rating:</span>
-        <select className="input-field max-w-xs" style={{ minWidth: '150px', margin: 0 }} value={filterStar} onChange={e => setFilterStar(e.target.value)}>
-          <option value="All">All Ratings</option>
-          <option value="5">5 Stars</option>
-          <option value="4">4 Stars</option>
-          <option value="3">3 Stars</option>
-          <option value="2">2 Stars</option>
-          <option value="1">1 Star</option>
-        </select>
-      </div>
 
       <div className="table-container">
         <table className="data-table">
@@ -212,7 +184,6 @@ function SubmissionsTab() {
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Rating</th>
               <th>Submitted</th>
               <th>Status</th>
               <th>Action</th>
@@ -224,11 +195,6 @@ function SubmissionsTab() {
                 <td>{s.customer_name}</td>
                 <td>{s.customer_email}</td>
                 <td>{s.customer_phone}</td>
-                <td>
-                  {s.overall_rating ? (
-                    <span style={{ color: '#fbbf24', fontSize: '1.1rem', letterSpacing: '1px' }}>{'★'.repeat(s.overall_rating)}{'☆'.repeat(5-s.overall_rating)}</span>
-                  ) : <span className="text-gray-400">-</span>}
-                </td>
                 <td>{new Date(s.submitted_at).toLocaleDateString()}</td>
                 <td>
                   <span style={{ padding: '4px 8px', borderRadius: '999px', fontSize: '0.8rem', backgroundColor: s.is_read ? '#f3f4f6' : '#dbeafe', color: s.is_read ? '#4b5563' : '#1d4ed8' }}>
