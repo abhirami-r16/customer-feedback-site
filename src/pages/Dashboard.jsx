@@ -187,7 +187,6 @@ function SubmissionsTab() {
           <thead>
             <tr>
               <th>No.</th>
-              <th>Rating</th>
               <th>Submitted</th>
               <th>Contact</th>
               <th>Status</th>
@@ -198,16 +197,7 @@ function SubmissionsTab() {
             {filteredSubmissions.map((s, index) => (
               <tr key={s.id} className={s.is_read ? '' : 'font-bold bg-blue-50'}>
                 <td className="text-gray-500 font-medium">{index + 1}</td>
-                <td>
-                  {s.overall_rating ? (
-                    <span className="text-yellow-400 text-lg">
-                      {'★'.repeat(s.overall_rating)}{'☆'.repeat(5 - s.overall_rating)}
-                    </span>
-                  ) : (
-                    <span className="text-gray-400">-</span>
-                  )}
-                </td>
-                <td>{new Date(s.submitted_at).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute:'2-digit' })}</td>
+                <td>{new Date(s.submitted_at).toLocaleDateString()}</td>
                 <td>
                   <span style={{ padding: '4px 8px', borderRadius: '999px', fontSize: '0.8rem', backgroundColor: s.wants_contact === 'Yes, you may contact me' ? '#dcfce7' : '#f3f4f6', color: s.wants_contact === 'Yes, you may contact me' ? '#166534' : '#4b5563' }}>
                     {s.wants_contact === 'Yes, you may contact me' ? 'Yes' : 'No'}
@@ -228,7 +218,7 @@ function SubmissionsTab() {
             ))}
             {filteredSubmissions.length === 0 && (
               <tr>
-                <td colSpan="6" className="text-center py-12 text-gray-500 font-medium">No feedback matches your filter.</td>
+                <td colSpan="5" className="text-center py-12 text-gray-500 font-medium">No feedback matches your filter.</td>
               </tr>
             )}
           </tbody>
