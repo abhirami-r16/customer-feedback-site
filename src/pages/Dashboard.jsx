@@ -15,8 +15,8 @@ export default function Dashboard() {
   }
 
   const handleShare = () => {
-    const link = 'http://localhost:5173/Male/feedbackform'
-    const msg = encodeURIComponent(`Hi, we would appreciate your feedback. Please take a moment to answer a few questions using the link below:\n\n${link}\n\nThank you!`)
+    const link = 'https://malefashion.in/Male/feedbackform'
+    const msg = encodeURIComponent(`Thank you for shopping with MALE.\n\nWe’d love to know how your experience was. Your feedback helps us serve you better.\n\nIt takes less than 1 minute.\n\n👉 Share your feedback:\n${link}\n\nThank you for choosing MALE. ❤️`)
     const modal = document.createElement('div')
     modal.className = 'modal glass-panel'
     modal.innerHTML = `
