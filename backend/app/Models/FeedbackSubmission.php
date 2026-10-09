@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class FeedbackSubmission extends Model
 {
     protected $fillable = [
-        'customer_name',
-        'customer_email',
-        'customer_phone',
         'overall_rating',
         'is_read',
         'submitted_at',
+        'wants_contact',
+        'customer_name',
+        'customer_phone',
     ];
 
     protected $casts = [

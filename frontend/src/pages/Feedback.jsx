@@ -6,11 +6,26 @@ export default function Feedback() {
   const [loading, setLoading] = useState(true)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [tokenError, setTokenError] = useState('')
+  const [token, setToken] = useState('')
 
-  const [customerInfo, setCustomerInfo] = useState({ name: '', email: '', phone: '' })
   const [answers, setAnswers] = useState({})
+  const [wantsContact, setWantsContact] = useState('')
+  const [customerName, setCustomerName] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
+
+  const [alreadySubmitted, setAlreadySubmitted] = useState(false)
 
   useEffect(() => {
+    if (localStorage.getItem('has_submitted_feedback') === 'true') {
+      setAlreadySubmitted(true)
+      setLoading(false)
+      return
+    }
+
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlToken = urlParams.get('token')
+    
     const fetchQuestions = async () => {
       try {
         const res = await api.get('/questions/active')
@@ -20,8 +35,29 @@ export default function Feedback() {
       }
       setLoading(false)
     }
-    fetchQuestions()
+
+    if (urlToken) {
+      setToken(urlToken)
+      validateToken(urlToken, fetchQuestions)
+    } else {
+      fetchQuestions()
+    }
+
   }, [])
+
+  const validateToken = async (t, callback) => {
+    try {
+      await api.get(`/validate-token/${t}`)
+      callback()
+    } catch (e) {
+      if (e.response && e.response.status === 400) {
+        setTokenError(e.response.data.message)
+      } else {
+        setTokenError('Invalid or expired link.')
+      }
+      setLoading(false)
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -46,14 +82,16 @@ export default function Feedback() {
     if (!valid) return
 
     const payload = {
-      customer_name: customerInfo.name,
-      customer_email: customerInfo.email,
-      customer_phone: customerInfo.phone,
-      answers: payloadAnswers
+      token: token,
+      answers: payloadAnswers,
+      wants_contact: wantsContact || 'No',
+      customer_name: wantsContact === 'Yes, you may contact me' ? customerName : null,
+      customer_phone: wantsContact === 'Yes, you may contact me' ? customerPhone : null,
     }
 
     try {
       await api.post('/feedback', payload)
+      localStorage.setItem('has_submitted_feedback', 'true')
       setSubmitted(true)
     } catch (e) {
       alert('Failed to submit feedback. Please try again.')
@@ -65,6 +103,20 @@ export default function Feedback() {
   }
 
   if (loading) return <div className="loader p-10 text-center">Loading Form...</div>
+  if (alreadySubmitted) return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="glass-panel p-10 text-center max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4">You have already submitted your feedback. Thank you!</h2>
+      </div>
+    </div>
+  )
+  if (tokenError) return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="glass-panel p-10 text-center max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4">{tokenError}</h2>
+      </div>
+    </div>
+  )
   if (error) return <p className="text-red-500 text-center mt-10">{error}</p>
 
   if (submitted) {
@@ -83,7 +135,7 @@ export default function Feedback() {
     <div className="feedback-page flex flex-col items-center p-4 min-h-screen">
       <div className="brand-header text-center mb-8 mt-4">
         <img 
-          src="/male-logo-new.jpg" 
+          src="/logo.jpeg" 
           alt="MALE Logo" 
           className="mx-auto mb-4 object-contain"
           style={{ height: '80px', width: 'auto', maxWidth: '150px' }}
@@ -94,53 +146,16 @@ export default function Feedback() {
       <div className="glass-panel w-full max-w-2xl p-6 md:p-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           
-          <div className="customer-info bg-gray-50 p-6 rounded-xl border border-gray-200">
-            <h3 className="text-xl font-semibold mb-4 border-b border-gray-200 pb-2">Your Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="form-group">
-                <label>Name *</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  required 
-                  placeholder="John Doe"
-                  value={customerInfo.name}
-                  onChange={e => setCustomerInfo({...customerInfo, name: e.target.value})}
-                />
-              </div>
-              <div className="form-group">
-                <label>Email *</label>
-                <input 
-                  type="email" 
-                  className="input-field" 
-                  required 
-                  placeholder="john@example.com"
-                  value={customerInfo.email}
-                  onChange={e => setCustomerInfo({...customerInfo, email: e.target.value})}
-                />
-              </div>
-              <div className="form-group md:col-span-2">
-                <label>Phone Number *</label>
-                <input 
-                  type="tel" 
-                  className="input-field" 
-                  required 
-                  pattern="[0-9]{10}"
-                  maxLength="10"
-                  title="Please enter exactly 10 digits"
-                  placeholder="e.g. 9876543210"
-                  value={customerInfo.phone}
-                  onChange={e => setCustomerInfo({...customerInfo, phone: e.target.value.replace(/\D/g, '')})}
-                />
-              </div>
-            </div>
-          </div>
+
 
           <div className="questions-section flex flex-col gap-8">
             <h3 className="text-xl font-semibold mb-2 border-b border-gray-200 pb-2">Feedback Questions</h3>
             {questions.map((q, index) => (
               <div key={q.id} className="question-block">
-                <p className="font-medium mb-4">{index + 1}. {q.question} {q.is_required && <span className="text-red-500">*</span>}</p>
+                <p className="font-medium mb-4">
+                  {index + 1}. {q.question} {q.is_required && <span className="text-red-500">*</span>}
+                  {q.question_type === 'Checkbox' && <span className="text-sm text-gray-500 ml-2 font-normal">(Multiple options allowed)</span>}
+                </p>
                 <QuestionInput 
                   question={q} 
                   value={answers[q.id] || ''} 
@@ -148,6 +163,50 @@ export default function Feedback() {
                 />
               </div>
             ))}
+          </div>
+
+          <div className="contact-section flex flex-col gap-4 p-6 bg-gray-50 rounded-xl border border-gray-200 mt-4">
+            <h3 className="text-xl font-semibold mb-2">Would you like us to contact you regarding your feedback?</h3>
+            <div className="flex gap-4 mb-4">
+              {['Yes, you may contact me', 'No, thank you'].map(opt => (
+                <label key={opt} className={`pill-option ${wantsContact === opt ? 'selected' : ''}`}>
+                  <input 
+                    type="radio" 
+                    name="wantsContact" 
+                    value={opt} 
+                    checked={wantsContact === opt}
+                    onChange={(e) => setWantsContact(e.target.value)}
+                    className="hidden"
+                  />
+                  <span>{opt}</span>
+                </label>
+              ))}
+            </div>
+
+            {wantsContact === 'Yes, you may contact me' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div className="form-group">
+                  <label>Name</label>
+                  <input 
+                    type="text" 
+                    className="input-field" 
+                    placeholder="Your Name"
+                    value={customerName}
+                    onChange={e => setCustomerName(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Mobile Number</label>
+                  <input 
+                    type="tel" 
+                    className="input-field" 
+                    placeholder="Your Mobile Number"
+                    value={customerPhone}
+                    onChange={e => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <button type="submit" className="btn btn-primary w-full text-lg py-3 mt-4 shadow-lg shadow-primary/30 transform transition hover:scale-[1.02]">
@@ -198,6 +257,41 @@ function QuestionInput({ question: q, value, onChange }) {
                 className="hidden"
               />
               {isNumberScale && <span className="text-2xl mb-1">{getEmoji(opt)}</span>}
+              <span>{opt}</span>
+            </label>
+          );
+        })}
+      </div>
+    )
+  }
+  if (q.question_type === 'Checkbox') {
+    const opts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || [])
+    const selectedOpts = typeof value === 'string' && value ? value.split(', ').filter(Boolean) : [];
+
+    const toggleOpt = (opt) => {
+      let newSelection;
+      if (selectedOpts.includes(opt)) {
+        newSelection = selectedOpts.filter(o => o !== opt);
+      } else {
+        newSelection = [...selectedOpts, opt];
+      }
+      onChange(newSelection.join(', '));
+    }
+
+    return (
+      <div className="options-container">
+        {opts.map(opt => {
+          const isSelected = selectedOpts.includes(opt);
+          return (
+            <label key={opt} className={`pill-option ${isSelected ? 'selected' : ''}`}>
+              <input 
+                type="checkbox" 
+                name={`q_${q.id}`} 
+                value={opt} 
+                checked={isSelected}
+                onChange={() => toggleOpt(opt)}
+                className="hidden"
+              />
               <span>{opt}</span>
             </label>
           );

@@ -13,6 +13,7 @@ Route::post('/admin/login', [AuthController::class, 'login']);
 // Public Routes
 Route::get('/questions/active', [PublicFeedbackController::class, 'getActiveQuestions']);
 Route::post('/feedback', [PublicFeedbackController::class, 'storeFeedback']);
+Route::get('/validate-token/{token}', [PublicFeedbackController::class, 'validateToken']);
 
 // Protected Admin Routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -29,4 +30,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/submissions/{id}', [AdminSubmissionController::class, 'show']);
     Route::put('/admin/submissions/{id}/read', [AdminSubmissionController::class, 'markRead']);
     Route::delete('/admin/submissions/{id}', [AdminSubmissionController::class, 'destroy']);
+    Route::post('/admin/generate-token', [AdminSubmissionController::class, 'generateToken']);
 });

@@ -1,0 +1,10 @@
+Add-Type -AssemblyName System.Drawing
+$img = [System.Drawing.Image]::FromFile('d:\feedback system\frontend\public\logo.jpeg')
+$cropRect = New-Object System.Drawing.Rectangle(0, 0, $img.Width, [int]($img.Height * 0.82))
+$bmp = New-Object System.Drawing.Bitmap($cropRect.Width, $cropRect.Height)
+$g = [System.Drawing.Graphics]::FromImage($bmp)
+$g.DrawImage($img, (New-Object System.Drawing.Rectangle(0, 0, $bmp.Width, $bmp.Height)), $cropRect, [System.Drawing.GraphicsUnit]::Pixel)
+$bmp.Save('d:\feedback system\frontend\public\logo_cropped.jpeg', [System.Drawing.Imaging.ImageFormat]::Jpeg)
+$g.Dispose()
+$bmp.Dispose()
+$img.Dispose()

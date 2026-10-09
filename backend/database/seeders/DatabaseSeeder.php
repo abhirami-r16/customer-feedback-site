@@ -52,10 +52,17 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'question' => 'What would you like MALE to improve?',
-                'question_type' => 'Multiple Choice',
+                'question_type' => 'Checkbox',
                 'options' => json_encode(['Product Variety', 'Designs', 'Fit & Sizes', 'Quality', 'Price', 'Customer Service', 'Other']),
                 'is_required' => true,
                 'sort_order' => 5,
+            ],
+            [
+                'question' => 'How can we make your next experience with MALE even better?',
+                'question_type' => 'Long Text',
+                'options' => null,
+                'is_required' => false,
+                'sort_order' => 6,
             ]
         ];
 

@@ -1,22 +1,33 @@
+# Laravel / Backend
+/vendor/
+.env
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+
 # Logs
-logs
 *.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Local files
 *.local
 
-# Editor directories and files
+# macOS
+.DS_Store
+
+# IDE / Editor
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj

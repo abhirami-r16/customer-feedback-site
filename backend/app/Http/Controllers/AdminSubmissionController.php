@@ -12,12 +12,7 @@ class AdminSubmissionController extends Controller
         $query = FeedbackSubmission::query();
 
         if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_email', 'like', "%{$search}%")
-                  ->orWhere('customer_phone', 'like', "%{$search}%");
-            });
+            // Search is removed because customer details are no longer tracked.
         }
 
         return response()->json($query->orderBy('submitted_at', 'desc')->get());
@@ -41,5 +36,19 @@ class AdminSubmissionController extends Controller
         $submission = FeedbackSubmission::findOrFail($id);
         $submission->delete();
         return response()->json(['message' => 'Deleted successfully']);
+    }
+
+    public function generateToken()
+    {
+        $token = \Illuminate\Support\Str::random(32);
+        $feedbackToken = \App\Models\FeedbackToken::create([
+            'token' => $token,
+            'status' => 'active'
+        ]);
+
+        return response()->json([
+            'token' => $token,
+            'link' => "https://malefashion.in/Male/feedbackform?v=4&token=" . $token
+        ]);
     }
 }

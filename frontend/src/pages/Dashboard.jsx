@@ -14,35 +14,42 @@ export default function Dashboard() {
     navigate('/login')
   }
 
-  const handleShare = () => {
-    const link = 'http://localhost:5173/Male/feedbackform'
-    const msg = encodeURIComponent(`Hi, we would appreciate your feedback. Please take a moment to answer a few questions using the link below:\n\n${link}\n\nThank you!`)
-    const modal = document.createElement('div')
-    modal.className = 'modal glass-panel'
-    modal.innerHTML = `
-      <div class="modal-content text-white">
-        <h3 class="text-xl mb-4">Share Link</h3>
-        <input type="text" value="${link}" readonly class="input-field mb-4 w-full" id="share-link-input">
-        <div class="flex gap-2">
-          <button class="btn btn-primary" id="btn-copy">Copy Link</button>
-          <a href="https://wa.me/?text=${msg}" target="_blank" class="btn bg-green-500 text-white">Share on WhatsApp</a>
-          <button class="btn btn-outline" style="color: #e5e7eb; border-color: #4b5563;" id="btn-close-modal">Close</button>
+  const handleShare = async () => {
+    try {
+      const link = "https://malefashion.in/Male/feedbackform?v=2&token=PqnM19GhXDu0tDoeVoNNgtLEY3gIJrHw";
+
+      
+      const msg = encodeURIComponent(`Thank you for shopping with MALE Fashion!\n\nWe'd love to hear about your shopping experience. Your feedback helps us serve you better and takes less than a minute.\n\nShare your feedback here:\n${link}\n\nThank you for choosing MALE Fashion!`)
+      
+      const modal = document.createElement('div')
+      modal.className = 'modal glass-panel'
+      modal.innerHTML = `
+        <div class="modal-content text-white">
+          <h3 class="text-xl mb-4">Share Link</h3>
+          <input type="text" value="${link}" readonly class="input-field mb-4 w-full" id="share-link-input">
+          <div class="flex gap-2">
+            <button class="btn btn-primary" id="btn-copy">Copy Link</button>
+            <a href="https://wa.me/?text=${msg}" target="_blank" class="btn bg-green-500 text-white">Share on WhatsApp</a>
+            <button class="btn btn-outline" style="color: #e5e7eb; border-color: #4b5563;" id="btn-close-modal">Close</button>
+          </div>
         </div>
-      </div>
-    `
-    document.body.appendChild(modal)
-    document.getElementById('btn-close-modal')?.addEventListener('click', () => modal.remove())
-    document.getElementById('btn-copy')?.addEventListener('click', () => {
-      navigator.clipboard.writeText(link)
-      alert('Link copied!')
-    })
+      `
+      document.body.appendChild(modal)
+      document.getElementById('btn-close-modal')?.addEventListener('click', () => modal.remove())
+      document.getElementById('btn-copy')?.addEventListener('click', () => {
+        navigator.clipboard.writeText(link)
+        alert('Link copied!')
+      })
+    } catch (e) {
+      alert('Failed to generate sharing link.')
+    }
   }
 
   return (
     <div className="dashboard-layout">
       <nav className="sidebar">
         <div className="sidebar-header">
-          <img src="/male-logo-new.jpg" alt="MALE Logo" className="sidebar-logo" />
+          <img src="/logo.jpeg" alt="MALE Logo" className="sidebar-logo" />
           <h2 className="sidebar-brand">MALE Admin</h2>
         </div>
         <ul className="nav-links">
@@ -130,16 +137,8 @@ function SubmissionsTab() {
           <button className="btn btn-outline" onClick={() => { setViewing(null); fetchSubmissions(); }}>← Back to Dashboard</button>
         </div>
         <div className="glass-panel p-8 max-w-3xl bg-white rounded-xl shadow border border-gray-100">
-          <h2 className="text-3xl font-bold mb-6 text-gray-900">Feedback Details</h2>
-          
-          <div className="grid grid-cols-2 gap-4 mb-8 bg-gray-50 p-4 rounded-lg">
-            <div><strong className="text-gray-500">Name:</strong> <br/><span className="text-lg">{viewing.customer_name}</span></div>
-            <div><strong className="text-gray-500">Email:</strong> <br/><span className="text-lg">{viewing.customer_email}</span></div>
-            <div><strong className="text-gray-500">Phone:</strong> <br/><span className="text-lg">{viewing.customer_phone}</span></div>
-            <div><strong className="text-gray-500">Submitted:</strong> <br/><span className="text-lg">{new Date(viewing.submitted_at).toLocaleString()}</span></div>
-          </div>
-          
-          <h3 className="font-bold text-xl mb-4 text-gray-900 border-b pb-2">Customer Responses</h3>
+          <h2 className="text-3xl font-bold mb-6 text-gray-900">Customer Feedback</h2>
+          <div className="text-sm text-gray-400 mb-6">Submitted: {new Date(viewing.submitted_at).toLocaleString()}</div>
           <div className="flex flex-col gap-6 mt-4">
             {viewing.answers.map((a, i) => (
               <div key={i} className="answer-block">
@@ -149,6 +148,19 @@ function SubmissionsTab() {
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h3 className="font-bold text-xl mb-4 text-gray-900">Contact Information</h3>
+            <div className="bg-gray-50 p-6 rounded-lg text-lg space-y-2">
+              <p><strong className="text-gray-600">Contact Requested:</strong> {viewing.wants_contact === 'Yes, you may contact me' ? 'Yes' : 'No'}</p>
+              {viewing.wants_contact === 'Yes, you may contact me' && (
+                <>
+                  <p><strong className="text-gray-600">Customer Name:</strong> {viewing.customer_name}</p>
+                  <p><strong className="text-gray-600">Mobile Number:</strong> {viewing.customer_phone}</p>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -181,21 +193,23 @@ function SubmissionsTab() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
+              <th>No.</th>
               <th>Submitted</th>
+              <th>Contact</th>
               <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {filteredSubmissions.map(s => (
+            {filteredSubmissions.map((s, index) => (
               <tr key={s.id} className={s.is_read ? '' : 'font-bold bg-blue-50'}>
-                <td>{s.customer_name}</td>
-                <td>{s.customer_email}</td>
-                <td>{s.customer_phone}</td>
+                <td className="text-gray-500 font-medium">{index + 1}</td>
                 <td>{new Date(s.submitted_at).toLocaleDateString()}</td>
+                <td>
+                  <span style={{ padding: '4px 8px', borderRadius: '999px', fontSize: '0.8rem', backgroundColor: s.wants_contact === 'Yes, you may contact me' ? '#dcfce7' : '#f3f4f6', color: s.wants_contact === 'Yes, you may contact me' ? '#166534' : '#4b5563' }}>
+                    {s.wants_contact === 'Yes, you may contact me' ? 'Yes' : 'No'}
+                  </span>
+                </td>
                 <td>
                   <span style={{ padding: '4px 8px', borderRadius: '999px', fontSize: '0.8rem', backgroundColor: s.is_read ? '#f3f4f6' : '#dbeafe', color: s.is_read ? '#4b5563' : '#1d4ed8' }}>
                     {s.is_read ? 'Read' : 'New'}
@@ -211,7 +225,7 @@ function SubmissionsTab() {
             ))}
             {filteredSubmissions.length === 0 && (
               <tr>
-                <td colSpan="7" className="text-center py-12 text-gray-500 font-medium">No feedback matches your filter.</td>
+                <td colSpan="5" className="text-center py-12 text-gray-500 font-medium">No feedback matches your filter.</td>
               </tr>
             )}
           </tbody>
@@ -339,7 +353,7 @@ function QuestionForm({ initialData, onBack, onSaved }) {
     const payload = {
       question: q_text,
       question_type: q_type,
-      options: q_type === 'Multiple Choice' ? q_options.split(',').map(s => s.trim()) : null,
+      options: (q_type === 'Multiple Choice' || q_type === 'Checkbox') ? q_options.split(',').map(s => s.trim()) : null,
       is_required: initialData ? initialData.is_required : true,
       is_active: initialData ? initialData.is_active : true,
       sort_order: initialData ? initialData.sort_order : 10
@@ -374,12 +388,13 @@ function QuestionForm({ initialData, onBack, onSaved }) {
             <select className="input-field" value={q_type} onChange={e=>setQType(e.target.value)}>
               <option value="Star Rating">Star Rating</option>
               <option value="Multiple Choice">Multiple Choice</option>
+              <option value="Checkbox">Checkbox</option>
               <option value="Yes/No">Yes/No</option>
               <option value="Text">Text</option>
               <option value="Long Text">Long Text</option>
             </select>
           </div>
-          {q_type === 'Multiple Choice' && (
+          {(q_type === 'Multiple Choice' || q_type === 'Checkbox') && (
             <div className="form-group">
               <label>Options (comma separated)</label>
               <input type="text" className="input-field" placeholder="Option 1, Option 2" value={q_options} onChange={e=>setQOptions(e.target.value)} />

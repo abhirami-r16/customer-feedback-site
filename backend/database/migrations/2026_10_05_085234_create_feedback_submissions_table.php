@@ -13,9 +13,7 @@ return new class extends Migration
     {
         Schema::create('feedback_submissions', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_name');
-            $table->string('customer_email');
-            $table->string('customer_phone');
+
             $table->integer('overall_rating')->nullable();
             $table->boolean('is_read')->default(false);
             $table->timestamp('submitted_at')->useCurrent();
