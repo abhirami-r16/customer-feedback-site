@@ -230,11 +230,11 @@ body {
 }
 
 .pill-option.selected {
-  background-color: #f3f4f6;
-  color: #111827;
-  border: 1px solid #9ca3af;
+  background-color: var(--primary);
+  color: #ffffff;
+  border: 1px solid var(--primary);
   font-weight: 600;
-  box-shadow: 0 0 0 1px #9ca3af;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 /* Tailwind-ish utilities manually added */

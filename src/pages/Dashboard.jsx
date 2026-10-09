@@ -15,8 +15,8 @@ export default function Dashboard() {
   }
 
   const handleShare = () => {
-    const link = 'http://localhost:5173/Male/feedbackform'
-    const msg = encodeURIComponent(`Hi, we would appreciate your feedback. Please take a moment to answer a few questions using the link below:\n\n${link}\n\nThank you!`)
+    const link = 'https://malefashion.in/Male/feedbackform'
+    const msg = encodeURIComponent(`Thank you for shopping with MALE.\n\nWe’d love to know how your experience was. Your feedback helps us serve you better.\n\nIt takes less than 1 minute.\n\n👉 Share your feedback:\n${link}\n\nThank you for choosing MALE. ❤️`)
     const modal = document.createElement('div')
     modal.className = 'modal glass-panel'
     modal.innerHTML = `
@@ -42,7 +42,7 @@ export default function Dashboard() {
     <div className="dashboard-layout">
       <nav className="sidebar">
         <div className="sidebar-header">
-          <img src="/male-logo-new.jpg" alt="MALE Logo" className="sidebar-logo" />
+          <img src="/logo.jpeg" alt="MALE Logo" className="sidebar-logo" />
           <h2 className="sidebar-brand">MALE Admin</h2>
         </div>
         <ul className="nav-links">
@@ -86,7 +86,6 @@ function SubmissionsTab() {
   const [loading, setLoading] = useState(true)
   const [viewing, setViewing] = useState(null)
   
-  const [filterStar, setFilterStar] = useState('All')
 
   const fetchSubmissions = async () => {
     setLoading(true)
@@ -131,16 +130,8 @@ function SubmissionsTab() {
           <button className="btn btn-outline" onClick={() => { setViewing(null); fetchSubmissions(); }}>← Back to Dashboard</button>
         </div>
         <div className="glass-panel p-8 max-w-3xl bg-white rounded-xl shadow border border-gray-100">
-          <h2 className="text-3xl font-bold mb-6 text-gray-900">Feedback Details</h2>
-          
-          <div className="grid grid-cols-2 gap-4 mb-8 bg-gray-50 p-4 rounded-lg">
-            <div><strong className="text-gray-500">Name:</strong> <br/><span className="text-lg">{viewing.customer_name}</span></div>
-            <div><strong className="text-gray-500">Email:</strong> <br/><span className="text-lg">{viewing.customer_email}</span></div>
-            <div><strong className="text-gray-500">Phone:</strong> <br/><span className="text-lg">{viewing.customer_phone}</span></div>
-            <div><strong className="text-gray-500">Submitted:</strong> <br/><span className="text-lg">{new Date(viewing.submitted_at).toLocaleString()}</span></div>
-          </div>
-          
-          <h3 className="font-bold text-xl mb-4 text-gray-900 border-b pb-2">Customer Responses</h3>
+          <h2 className="text-3xl font-bold mb-6 text-gray-900">Customer Feedback</h2>
+          <div className="text-sm text-gray-400 mb-6">Submitted: {new Date(viewing.submitted_at).toLocaleString()}</div>
           <div className="flex flex-col gap-6 mt-4">
             {viewing.answers.map((a, i) => (
               <div key={i} className="answer-block">
@@ -151,6 +142,19 @@ function SubmissionsTab() {
               </div>
             ))}
           </div>
+
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h3 className="font-bold text-xl mb-4 text-gray-900">Contact Information</h3>
+            <div className="bg-gray-50 p-6 rounded-lg text-lg space-y-2">
+              <p><strong className="text-gray-600">Contact Requested:</strong> {viewing.wants_contact === 'Yes, you may contact me' ? 'Yes' : 'No'}</p>
+              {viewing.wants_contact === 'Yes, you may contact me' && (
+                <>
+                  <p><strong className="text-gray-600">Customer Name:</strong> {viewing.customer_name}</p>
+                  <p><strong className="text-gray-600">Mobile Number:</strong> {viewing.customer_phone}</p>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -158,18 +162,7 @@ function SubmissionsTab() {
 
   // Calculate stats
   const totalSubmissions = submissions.length;
-  const ratings = submissions.map(s => s.overall_rating).filter(r => r !== null);
-  const averageRating = ratings.length > 0 ? (ratings.reduce((a,b)=>a+b,0) / ratings.length).toFixed(1) : 0;
-  
-  const starCounts = { 5:0, 4:0, 3:0, 2:0, 1:0 };
-  ratings.forEach(r => { if(starCounts[r] !== undefined) starCounts[r]++ });
-
-  const filteredSubmissions = submissions.filter(s => {
-    if (filterStar !== 'All') {
-      return s.overall_rating === parseInt(filterStar);
-    }
-    return true;
-  });
+  const filteredSubmissions = submissions;
 
   return (
     <div>
@@ -185,51 +178,31 @@ function SubmissionsTab() {
           <span className="stat-label">Total Submissions</span>
           <span className="stat-value text-blue-600">{totalSubmissions}</span>
         </div>
-        <div className="stat-card" style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <span className="stat-label">Average Rating</span>
-          <span className="stat-value flex items-center gap-2">
-            {averageRating} <span style={{ color: '#fbbf24', fontSize: '2rem' }}>★</span>
-          </span>
-        </div>
+
       </div>
 
-      <div className="mb-6 flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100 inline-flex">
-        <span className="font-bold text-gray-700 uppercase tracking-wide text-sm">Filter by Rating:</span>
-        <select className="input-field max-w-xs" style={{ minWidth: '150px', margin: 0 }} value={filterStar} onChange={e => setFilterStar(e.target.value)}>
-          <option value="All">All Ratings</option>
-          <option value="5">5 Stars</option>
-          <option value="4">4 Stars</option>
-          <option value="3">3 Stars</option>
-          <option value="2">2 Stars</option>
-          <option value="1">1 Star</option>
-        </select>
-      </div>
 
       <div className="table-container">
         <table className="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Rating</th>
+              <th>No.</th>
               <th>Submitted</th>
+              <th>Contact</th>
               <th>Status</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {filteredSubmissions.map(s => (
+            {filteredSubmissions.map((s, index) => (
               <tr key={s.id} className={s.is_read ? '' : 'font-bold bg-blue-50'}>
-                <td>{s.customer_name}</td>
-                <td>{s.customer_email}</td>
-                <td>{s.customer_phone}</td>
-                <td>
-                  {s.overall_rating ? (
-                    <span style={{ color: '#fbbf24', fontSize: '1.1rem', letterSpacing: '1px' }}>{'★'.repeat(s.overall_rating)}{'☆'.repeat(5-s.overall_rating)}</span>
-                  ) : <span className="text-gray-400">-</span>}
-                </td>
+                <td className="text-gray-500 font-medium">{index + 1}</td>
                 <td>{new Date(s.submitted_at).toLocaleDateString()}</td>
+                <td>
+                  <span style={{ padding: '4px 8px', borderRadius: '999px', fontSize: '0.8rem', backgroundColor: s.wants_contact === 'Yes, you may contact me' ? '#dcfce7' : '#f3f4f6', color: s.wants_contact === 'Yes, you may contact me' ? '#166534' : '#4b5563' }}>
+                    {s.wants_contact === 'Yes, you may contact me' ? 'Yes' : 'No'}
+                  </span>
+                </td>
                 <td>
                   <span style={{ padding: '4px 8px', borderRadius: '999px', fontSize: '0.8rem', backgroundColor: s.is_read ? '#f3f4f6' : '#dbeafe', color: s.is_read ? '#4b5563' : '#1d4ed8' }}>
                     {s.is_read ? 'Read' : 'New'}
@@ -245,7 +218,7 @@ function SubmissionsTab() {
             ))}
             {filteredSubmissions.length === 0 && (
               <tr>
-                <td colSpan="7" className="text-center py-12 text-gray-500 font-medium">No feedback matches your filter.</td>
+                <td colSpan="5" className="text-center py-12 text-gray-500 font-medium">No feedback matches your filter.</td>
               </tr>
             )}
           </tbody>
@@ -373,7 +346,7 @@ function QuestionForm({ initialData, onBack, onSaved }) {
     const payload = {
       question: q_text,
       question_type: q_type,
-      options: q_type === 'Multiple Choice' ? q_options.split(',').map(s => s.trim()) : null,
+      options: (q_type === 'Multiple Choice' || q_type === 'Checkbox') ? q_options.split(',').map(s => s.trim()) : null,
       is_required: initialData ? initialData.is_required : true,
       is_active: initialData ? initialData.is_active : true,
       sort_order: initialData ? initialData.sort_order : 10
@@ -408,12 +381,13 @@ function QuestionForm({ initialData, onBack, onSaved }) {
             <select className="input-field" value={q_type} onChange={e=>setQType(e.target.value)}>
               <option value="Star Rating">Star Rating</option>
               <option value="Multiple Choice">Multiple Choice</option>
+              <option value="Checkbox">Checkbox</option>
               <option value="Yes/No">Yes/No</option>
               <option value="Text">Text</option>
               <option value="Long Text">Long Text</option>
             </select>
           </div>
-          {q_type === 'Multiple Choice' && (
+          {(q_type === 'Multiple Choice' || q_type === 'Checkbox') && (
             <div className="form-group">
               <label>Options (comma separated)</label>
               <input type="text" className="input-field" placeholder="Option 1, Option 2" value={q_options} onChange={e=>setQOptions(e.target.value)} />

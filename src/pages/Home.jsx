@@ -28,7 +28,7 @@ export default function Home() {
         </div>
 
         <div className="hero-image-container">
-          <img src="/male-logo-new.jpg" className="hero-image" alt="Brand Showcase" />
+          <img src="/logo.jpeg" className="hero-image" alt="Brand Showcase" />
         </div>
       </main>
 
